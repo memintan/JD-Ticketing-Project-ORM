@@ -1,6 +1,5 @@
 package com.ticketing.converter;
 
-import com.ticketing.dto.RoleDTO;
 import com.ticketing.dto.UserDTO;
 import com.ticketing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ public class UserDtoConverter implements Converter <String, UserDTO> {
 
     @Override
     public UserDTO convert(String source) {
-        return userService.findById(source);
+        return userService.findByUserName(source);
     }
 
 }

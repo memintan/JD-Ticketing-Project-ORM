@@ -15,13 +15,10 @@ public class RoleDtoConverter implements Converter<String, RoleDTO> {
     @Autowired
     RoleService roleService;
 
+
     @Override
     public RoleDTO convert(String source) {
-
         Long id = Long.parseLong(source);
-        RoleDTO object = new RoleDTO();
-        object = roleService.findById(id);
-
-        return object;
+        return roleService.findById(id);
     }
 }
