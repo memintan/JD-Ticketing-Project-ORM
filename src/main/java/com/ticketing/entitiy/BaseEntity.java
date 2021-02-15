@@ -32,4 +32,11 @@ public class BaseEntity {
         this.insertUserId = 1L;
         this.lastUpdateUserId = 1L;
     }
+
+    @PreUpdate
+    private void onPreUpdate(){
+        this.lastUpdateDateTime = LocalDateTime.now();
+        this.lastUpdateUserId = 1L;
+
+    }
 }
