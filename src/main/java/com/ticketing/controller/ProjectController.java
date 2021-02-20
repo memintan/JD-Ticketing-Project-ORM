@@ -4,6 +4,8 @@ import com.ticketing.dto.ProjectDTO;
 import com.ticketing.dto.TaskDTO;
 import com.ticketing.dto.UserDTO;
 import com.ticketing.enums.Status;
+import com.ticketing.service.ProjectService;
+import com.ticketing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,22 +21,24 @@ import java.util.stream.Collectors;
 @RequestMapping("/project")
 public class ProjectController {
 
-//    @Autowired
-//    ProjectService projectService;
-//    @Autowired
-//    UserService userService;
-//    @Autowired
-//    TaskService taskService;
-//
-//    @GetMapping("/create")
-//    public String createProject(Model model) {
-//        model.addAttribute("project", new ProjectDTO());
-//        model.addAttribute("projects", projectService.findAll());
-//        model.addAttribute("managers", userService.findManagers());
-//
-//        return "/project/create";
-//    }
-//
+
+    private ProjectService projectService;
+    private UserService userService;
+
+    public ProjectController(ProjectService projectService, UserService userService) {
+        this.projectService = projectService;
+        this.userService = userService;
+    }
+
+        @GetMapping("/create")
+    public String createProject(Model model) {
+        model.addAttribute("project", new ProjectDTO());
+        model.addAttribute("projects", projectService.listAllProjects());
+        model.addAttribute("managers", userService.listAllByRole("manager"));
+
+        return "/project/create";
+    }
+
 //    @PostMapping("/create")
 //    public String insertProject(ProjectDTO project) {
 //        projectService.save(project);
