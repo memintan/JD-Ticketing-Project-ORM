@@ -1,6 +1,7 @@
 package com.ticketing.implementation;
 
 import com.ticketing.dto.ProjectDTO;
+import com.ticketing.dto.UserDTO;
 import com.ticketing.entitiy.Project;
 import com.ticketing.entitiy.User;
 import com.ticketing.enums.Status;
@@ -8,6 +9,7 @@ import com.ticketing.mapper.ProjectMapper;
 import com.ticketing.mapper.UserMapper;
 import com.ticketing.repository.ProjectRepository;
 import com.ticketing.service.ProjectService;
+import com.ticketing.service.TaskService;
 import com.ticketing.service.UserService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -22,14 +24,14 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
     private UserMapper userMapper;
     private UserService userService;
-    //private TaskService taskService;
+    private TaskService taskService;
 
-    public ProjectServiceImpl(ProjectMapper projectMapper, ProjectRepository projectRepository, UserMapper userMapper, UserService userService) {
+    public ProjectServiceImpl(ProjectMapper projectMapper, ProjectRepository projectRepository, UserMapper userMapper, UserService userService, TaskService taskService) {
         this.projectMapper = projectMapper;
         this.projectRepository = projectRepository;
         this.userMapper = userMapper;
         this.userService = userService;
-        //this.taskService = taskService;
+        this.taskService = taskService;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project save(ProjectDTO dto) {
         dto.setProjectStatus(Status.OPEN);
         Project obj = projectMapper.convertToEntity(dto);
-        obj.setAssignedManager(userMapper.convertToEntity(dto.getAssignedManager()));
+//        obj.setAssignedManager(userMapper.convertToEntity(dto.getAssignedManager()));
         Project project = projectRepository.save(obj);
         return project;
     }
@@ -70,7 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectCode(project.getProjectCode() +  "-" + project.getId());
         projectRepository.save(project);
 
-        //taskService.deleteByProject(projectMapper.convertToDto(project));
+        taskService.deleteByProject(projectMapper.convertToDto(project));
     }
 
     @Override
@@ -82,25 +84,21 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> listAllProjectDetails() {
-        return null;
-    }
+        UserDTO currentUserDTO = userService.findByUserName("java@cybertekschool.com");
+        User user = userMapper.convertToEntity(currentUserDTO);
+        List<Project> list = projectRepository.findAllByAssignedManager(user);
 
-//    @Override
-//    public List<ProjectDTO> listAllProjectDetails() {
-//        UserDTO currentUserDTO = userService.findByUserName("java@cybertekschool.com");
-//        User user = userMapper.convertToEntity(currentUserDTO);
-//        List<Project> list = projectRepository.findAllByAssignedManager(user);
-//
-//        return list.stream().map(project -> {
-//            ProjectDTO obj = projectMapper.convertToDto(project);
-//            obj.setUnfinishedTaskCounts(taskService.totalNonCompletedTasks(project.getProjectCode()));
-//            obj.setCompleteTaskCounts(taskService.totalCompletedTasks(project.getProjectCode()));
-//            return obj;
-//        }).collect(Collectors.toList());
-//
-//
-//
-//    }
+        return list.stream().map(project -> {
+            ProjectDTO obj = projectMapper.convertToDto(project);
+            obj.setUnFinishedTaskCounts(taskService.totalCompletedTasks(project.getProjectCode()));
+            //obj.setUnfinishedTaskCounts(taskService.totalNonCompletedTasks(project.getProjectCode()));
+            obj.setCompleteTaskCounts(taskService.totalCompletedTasks(project.getProjectCode()));
+            return obj;
+        }).collect(Collectors.toList());
+
+
+
+    }
 
     @Override
     public List<ProjectDTO> readAllByAssignedManager(User user) {

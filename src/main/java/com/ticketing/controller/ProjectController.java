@@ -30,27 +30,31 @@ public class ProjectController {
         this.userService = userService;
     }
 
-        @GetMapping("/create")
-    public String createProject(Model model) {
-        model.addAttribute("project", new ProjectDTO());
-        model.addAttribute("projects", projectService.listAllProjects());
-        model.addAttribute("managers", userService.listAllByRole("manager"));
+
+    @GetMapping("/create")
+    public String createProject(Model model){
+
+        model.addAttribute("project",new ProjectDTO());
+        model.addAttribute("projects",projectService.listAllProjects());
+        model.addAttribute("managers",userService.listAllByRole("manager"));
 
         return "/project/create";
     }
 
     @PostMapping("/create")
-    public String insertProject(ProjectDTO project) {
+    public String insertProject(ProjectDTO project){
         projectService.save(project);
-        project.setProjectStatus(Status.OPEN);
         return "redirect:/project/create";
+
     }
 
     @GetMapping("/delete/{projectcode}")
-    public String deleteProject(@PathVariable("projectcode") String projectcode) {
+    public String deleteProject(@PathVariable("projectcode") String projectcode){
+
         projectService.delete(projectcode);
         return "redirect:/project/create";
     }
+
 
     @GetMapping("/complete/{projectcode}")
     public String completeProject(@PathVariable("projectcode") String projectcode){
@@ -58,56 +62,41 @@ public class ProjectController {
         return "redirect:/project/create";
     }
 
-    @GetMapping("/update/{projectcode}")
-    public String editProject(@PathVariable("projectcode") String projectcode, Model model){
 
-        model.addAttribute("project", projectService.getByProjectCode(projectcode));
-        model.addAttribute("projects", projectService.listAllProjects());
-        model.addAttribute("managers", userService.listAllByRole("manager"));
+    @GetMapping("/update/{projectcode}")
+    public String editProject(@PathVariable("projectcode") String projectcode,Model model){
+
+        model.addAttribute("project",projectService.getByProjectCode(projectcode));
+        model.addAttribute("projects",projectService.listAllProjects());
+        model.addAttribute("managers",userService.listAllByRole("manager"));
+
         return "/project/update";
     }
 
     @PostMapping("/update/{projectcode}")
-    public String updateProject(@PathVariable("projectcode") String projectcode, ProjectDTO project){
+    public String updateProject(@PathVariable("projectcode") String projectcode,ProjectDTO project){
 
         projectService.update(project);
 
         return "redirect:/project/create";
     }
 
-//    @GetMapping("/manager/complete")
-//    public String getProjectByManager(Model model){
-//
-//        UserDTO manager = userService.findById("john@cybertek.com");
-//
-//        List<ProjectDTO> projects = getCountedListOfProjectDTO(manager);//projectService.findAll().stream().filter(project -> project.getAssignedManager().equals(manager)).collect(Collectors.toList());
-//        model.addAttribute("projects", projects);
-//
-//        return "/manager/project-status";
-//    }
-//
-//    List<ProjectDTO> getCountedListOfProjectDTO(UserDTO manager){
-//
-//        List<ProjectDTO> list = projectService
-//                .findAll()
-//                .stream()
-//                .filter(x -> x.getAssignedManager().equals(manager))
-//                .map(x -> {
-//                    List<TaskDTO> taskList = taskService.findTaskByManager(manager);
-//                    int completeCount =(int) taskList.stream().filter(t -> t.getProject().equals(x) && t.getTaskStatus() == Status.COMPLETE).count();
-//                    int inCompleteCount =(int) taskList.stream().filter(t -> t.getProject().equals(x) && t.getTaskStatus() != Status.COMPLETE).count();
-//
-//                    x.setCompleteTaskCounts(completeCount);
-//                    x.setUnFinishedTaskCounts(inCompleteCount);
-////                    return new ProjectDTO(x.getProjectName(),x.getProjectCode()
-////                            ,userService.findById(x.getAssignedManager().getUserName()),x.getStartDate(),x.getEndDate(),x.getProjectDetail(),x.getProjectStatus()
-////                            ,completeCount, inCompleteCount);
-//                    return x;
-//
-//                }).collect(Collectors.toList());
-//        return list;
-//    }
 
+    @GetMapping("/manager/complete")
+    public String getProjectByManager(Model model){
 
+        List<ProjectDTO> projects = projectService.listAllProjectDetails();
+        model.addAttribute("projects",projects);
+
+        return "/manager/project-status";
+    }
+
+    @GetMapping("/manager/complete/{projectCode}")
+    public String manager_completed(@PathVariable("projectCode") String projectCode,Model model){
+
+        projectService.complete(projectCode);
+
+        return "redirect:/project/manager/complete";
+    }
 
 }
