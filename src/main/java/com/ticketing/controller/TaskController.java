@@ -2,6 +2,9 @@ package com.ticketing.controller;
 
 import com.ticketing.dto.TaskDTO;
 import com.ticketing.enums.Status;
+import com.ticketing.service.ProjectService;
+import com.ticketing.service.TaskService;
+import com.ticketing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,38 +20,34 @@ import java.util.UUID;
 @RequestMapping("/task")
 public class TaskController {
 
-//    @Autowired
-//    ProjectService projectService;
-//    @Autowired
-//    UserService userService;
-//    @Autowired
-//    TaskService taskService;
-//
-//    @GetMapping("/create")
-//    public String createTask(Model model){
-//
-//        model.addAttribute("task", new TaskDTO());
-//        model.addAttribute("projects", projectService.findAll());
-//        model.addAttribute("employees",userService.findAll());
-//        model.addAttribute("tasks", taskService.findAll());
-//
-//
-//        return "task/create";
-//    }
-//
-//    @PostMapping("/create")
-//    public String insertTask(Model model, TaskDTO task ){
-//
-//        task.setTaskStatus(Status.OPEN);
-//        task.setAssignedDate(LocalDate.now());
-//        task.setId(UUID.randomUUID().getMostSignificantBits());
-//
-//        System.out.println("Auto generated ID => " + task.getId());
-//        taskService.save(task);
-//
-//
-//        return "redirect:/task/create";
-//    }
+
+    ProjectService projectService;
+    UserService userService;
+    TaskService taskService;
+
+    public TaskController(ProjectService projectService, UserService userService, TaskService taskService) {
+        this.projectService = projectService;
+        this.userService = userService;
+        this.taskService = taskService;
+    }
+
+    @GetMapping("/create")
+    public String createTask(Model model){
+
+        model.addAttribute("task", new TaskDTO());
+        model.addAttribute("projects", projectService.listAllProjects());
+        model.addAttribute("employees",userService.listAllByRole("employee"));
+        model.addAttribute("tasks", taskService.listAllTasks());
+
+
+        return "task/create";
+    }
+
+    @PostMapping("/create")
+    public String insertTask(Model model, TaskDTO task ){
+        taskService.save(task);
+        return "redirect:/task/create";
+    }
 //
 //    @GetMapping("/delete/{id}")
 //    public String deleteTask(@PathVariable("id") Long id) {
