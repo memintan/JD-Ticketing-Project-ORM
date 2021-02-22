@@ -4,12 +4,14 @@ import com.ticketing.dto.ProjectDTO;
 import com.ticketing.dto.TaskDTO;
 import com.ticketing.dto.UserDTO;
 import com.ticketing.entitiy.User;
+import com.ticketing.exception.TicketingProjectException;
 import com.ticketing.mapper.UserMapper;
 import com.ticketing.repository.UserRepository;
 import com.ticketing.service.ProjectService;
 import com.ticketing.service.TaskService;
 import com.ticketing.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ public class UserServiceImpl implements UserService {
     ProjectService projectService;
     TaskService taskService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, ProjectService projectService, TaskService taskService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, TaskService taskService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.projectService = projectService;
@@ -65,8 +67,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(String username) {
+    public void delete(String username) throws TicketingProjectException {
         User user = userRepository.findByUserName(username);
+        if (user == null){
+            throw new TicketingProjectException("User Does not Exists");
+        }
+        if (!checkIfUserCanBeDeleted(user)){
+            throw new TicketingProjectException("User can not be deleted. It is linked by a project or task");
+        }
+
+        user.setUserName(user.getUserName() + "-" + user.getId());
+
         user.setIsDeleted(true);
         userRepository.save(user);
     }
