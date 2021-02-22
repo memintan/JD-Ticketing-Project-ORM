@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private TaskService taskService;
     private MapperUtil mapperUtil;
 
-    public UserServiceImpl(UserRepository userRepository, ProjectService projectService, TaskService taskService, MapperUtil mapperUtil) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy ProjectService projectService, TaskService taskService, MapperUtil mapperUtil) {
         this.userRepository = userRepository;
         this.projectService = projectService;
         this.taskService = taskService;
